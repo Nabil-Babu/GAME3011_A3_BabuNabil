@@ -73,7 +73,7 @@ public class GameBoardManager : Singleton<GameBoardManager>
         }
     }
     
-    private IEnumerator ShiftTilesDown(int x, int yStart, float shiftDelay = .5f) {
+    private IEnumerator ShiftTilesDown(int x, int yStart, float shiftDelay = .2f) {
         IsShifting = true;
         List<SpriteRenderer> renders = new List<SpriteRenderer>();
         int nullCount = 0;

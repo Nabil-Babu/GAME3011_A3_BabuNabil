@@ -132,8 +132,9 @@ public class TileBehaviour : MonoBehaviour
         if (matchFound) {
             render.sprite = null;
             matchFound = false;
-            StopCoroutine(GameBoardManager.instance.FindNullTiles()); //Add this line
+            StopCoroutine(GameBoardManager.instance.FindNullTiles()); 
             StartCoroutine(GameBoardManager .instance.FindNullTiles());
+            GUIManager.instance.PlayerScore += 50;
         }
     }
 
