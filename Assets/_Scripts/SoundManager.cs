@@ -6,9 +6,20 @@ public class SoundManager : Singleton<SoundManager>
 {
     public AudioSource source;
     public AudioClip ClearMatchSound;
-
+    public bool isAudioPlaying = false;
+    [Range(0.1f,1.0f)]
+    public float VolumeLevel = 0.1f;
     public void PlayClearSFX()
     {
-        source.PlayOneShot(ClearMatchSound, 0.1f);
+        if (isAudioPlaying) return;
+        StartCoroutine(PlayMatchSound());
+    }
+
+    IEnumerator PlayMatchSound()
+    {
+        isAudioPlaying = true; 
+        source.PlayOneShot(ClearMatchSound, VolumeLevel);
+        yield return new WaitForSeconds(0.1f);
+        isAudioPlaying = false;
     }
 }

@@ -138,6 +138,7 @@ public class TileBehaviour : MonoBehaviour
             StartCoroutine(GameBoardManager .instance.FindNullTiles());
             Debug.Log("Increasing Score");
             GameBoardManager.instance.IncreaseScore(50);
+            SoundManager.instance.PlayClearSFX();
         }
     }
 
