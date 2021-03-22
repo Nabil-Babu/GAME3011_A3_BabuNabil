@@ -11,7 +11,7 @@ public class TileBehaviour : MonoBehaviour
     private static TileBehaviour _previousSelectedTile = null;
     [SerializeField] private SpriteRenderer render;
     private bool IsSelected { get; set; } = false;
-    
+   
     private Vector3[] adjacentDirections = new Vector3[] { Vector3.up, Vector3.down, Vector3.left, Vector3.right };
     private bool matchFound = false;
     void Awake()
@@ -44,6 +44,7 @@ public class TileBehaviour : MonoBehaviour
     private void OnMouseDown()
     {
         if (render.sprite == null) return;
+        if (!GameBoardManager.instance.IsPlaying) return;
         
         if (IsSelected)
         {
@@ -55,13 +56,13 @@ public class TileBehaviour : MonoBehaviour
             } else {
                 if (GetAllAdjacentTiles().Contains(_previousSelectedTile.gameObject))
                 {
-                    Debug.Log("Swapping Tiles");
+                    //Debug.Log("Swapping Tiles");
                     SwapImages(_previousSelectedTile.render);
                     _previousSelectedTile.ClearAllMatches();
                     _previousSelectedTile.Deselect();
                     ClearAllMatches();
                 } else {
-                    Debug.Log("New Select");
+                    //Debug.Log("New Select");
                     _previousSelectedTile.Deselect();
                     Select();
                 }
@@ -102,11 +103,11 @@ public class TileBehaviour : MonoBehaviour
         Physics.Raycast(transform.position, castDir, out hit);
         while (hit.collider != null && hit.collider.GetComponent<SpriteRenderer>().sprite == render.sprite)
         {
-            Debug.Log("Found Match!");
+            //Debug.Log("Found Match!");
             matchingTiles.Add(hit.collider.gameObject);
             Physics.Raycast(hit.collider.transform.position, castDir, out hit);
         }
-        Debug.Log("No More Matches");
+        //Debug.Log("No More Matches");
         return matchingTiles;
     }
     
@@ -120,6 +121,7 @@ public class TileBehaviour : MonoBehaviour
                 matchingTiles[i].GetComponent<SpriteRenderer>().sprite = null;
             }
             matchFound = true;
+            
         }
     }
     
@@ -134,8 +136,11 @@ public class TileBehaviour : MonoBehaviour
             matchFound = false;
             StopCoroutine(GameBoardManager.instance.FindNullTiles()); 
             StartCoroutine(GameBoardManager .instance.FindNullTiles());
-            GUIManager.instance.PlayerScore += 50;
+            Debug.Log("Increasing Score");
+            GameBoardManager.instance.IncreaseScore(50);
         }
     }
+
+    
 
 }

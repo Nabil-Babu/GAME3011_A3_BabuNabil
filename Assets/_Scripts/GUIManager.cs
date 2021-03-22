@@ -17,7 +17,48 @@ public class GUIManager : Singleton<GUIManager>
         set
         {
             _playerScore = value;
-            Score.text = _playerScore.ToString(); 
+            Score.text = _playerScore.ToString() +" / "+ GameBoardManager.instance.scoreLimit.ToString(); 
         }
     }
+
+    public TextMeshProUGUI Time;
+    [SerializeField] private int _currentTime;
+    public int CurrentTime
+    {
+        get
+        {
+            return _currentTime;
+        }
+        set
+        {
+            _currentTime = value;
+            Time.text = _currentTime.ToString() + "s";
+        }
+    }
+
+
+    public GameObject VictoryText;
+    public GameObject LossText;
+    public GameObject MessageBackground; 
+    public void EnableVictoryText()
+    {
+        MessageBackground.SetActive(true);
+        VictoryText.SetActive(true);
+        LossText.SetActive(false);
+    }
+    
+    public void EnableLossText()
+    {
+        MessageBackground.SetActive(true);
+        VictoryText.SetActive(false);
+        LossText.SetActive(true);
+    }
+
+    public void ResetMessages()
+    {
+        MessageBackground.SetActive(false);
+        VictoryText.SetActive(false);
+        LossText.SetActive(false);
+    }
+    
 }
