@@ -13,6 +13,8 @@ public class GameBoardManager : Singleton<GameBoardManager>
     private GameObject[,] _tileGrid;
     private Transform _boardTransform;
     
+    public bool IsShifting { get; set; }
+    
     void Start()
     {
         _boardTransform = transform;
@@ -54,5 +56,60 @@ public class GameBoardManager : Singleton<GameBoardManager>
         }
     }
     
+    public IEnumerator FindNullTiles() {
+        for (int x = 0; x < boardXSize; x++) {
+            for (int y = 0; y < boardYSize; y++) {
+                if (_tileGrid[x, y].GetComponent<SpriteRenderer>().sprite == null) {
+                    yield return StartCoroutine(ShiftTilesDown(x, y));
+                    break;
+                }
+            }
+        }
+
+        for (int x = 0; x < boardXSize; x++) {
+            for (int y = 0; y < boardYSize; y++) {
+                _tileGrid[x, y].GetComponent<TileBehaviour>().ClearAllMatches();
+            }
+        }
+    }
     
+    private IEnumerator ShiftTilesDown(int x, int yStart, float shiftDelay = .5f) {
+        IsShifting = true;
+        List<SpriteRenderer> renders = new List<SpriteRenderer>();
+        int nullCount = 0;
+
+        for (int y = yStart; y < boardYSize; y++) {
+            SpriteRenderer render = _tileGrid[x, y].GetComponent<SpriteRenderer>();
+            if (render.sprite == null) {
+                nullCount++;
+            }
+            renders.Add(render);
+        }
+
+        for (int i = 0; i < nullCount; i++) {
+            yield return new WaitForSeconds(shiftDelay);
+            for (int k = 0; k < renders.Count - 1; k++) {
+                renders[k].sprite = renders[k + 1].sprite;
+                renders[k + 1].sprite = GetNewSprite(x, boardYSize - 1);
+            }
+        }
+        IsShifting = false;
+    }
+    
+    private Sprite GetNewSprite(int x, int y) {
+        List<Sprite> possibleCharacters = new List<Sprite>();
+        possibleCharacters.AddRange(tileImages);
+
+        if (x > 0) {
+            possibleCharacters.Remove(_tileGrid[x - 1, y].GetComponent<SpriteRenderer>().sprite);
+        }
+        if (x < boardXSize - 1) {
+            possibleCharacters.Remove(_tileGrid[x + 1, y].GetComponent<SpriteRenderer>().sprite);
+        }
+        if (y > 0) {
+            possibleCharacters.Remove(_tileGrid[x, y - 1].GetComponent<SpriteRenderer>().sprite);
+        }
+
+        return possibleCharacters[Random.Range(0, possibleCharacters.Count)];
+    }
 }
