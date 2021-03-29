@@ -10,17 +10,23 @@ public class TileBehaviour : MonoBehaviour
     private static readonly Color MatchedColor = new Color(0.0f, 1.0f, 0.0f, 1.0f);
     private static TileBehaviour _previousSelectedTile = null;
     [SerializeField] private SpriteRenderer render;
+    [SerializeField] private Animator _animator;
     private bool IsSelected { get; set; } = false;
    
     private Vector3[] adjacentDirections = new Vector3[] { Vector3.up, Vector3.down, Vector3.left, Vector3.right };
     private bool matchFound = false;
+    private bool isBlocker = false; 
+    private static readonly int Spawn = Animator.StringToHash("Spawn");
+
     void Awake()
     {
         render = GetComponent<SpriteRenderer>();
+        _animator = GetComponent<Animator>();
     }
 
     private void Select()
     {
+        Debug.Log("Tile Selected");
         IsSelected = true;
         render.color = SelectedColor;
         _previousSelectedTile = gameObject.GetComponent<TileBehaviour>();
@@ -45,6 +51,7 @@ public class TileBehaviour : MonoBehaviour
     {
         if (render.sprite == null) return;
         if (!GameBoardManager.instance.IsPlaying) return;
+        if (isBlocker) return;
         
         if (IsSelected)
         {
@@ -142,6 +149,19 @@ public class TileBehaviour : MonoBehaviour
         }
     }
 
+    public void SpawnTile()
+    {
+        _animator.SetTrigger(Spawn);
+    }
+
+    public void MakeBlocker()
+    {
+        isBlocker = true; 
+    }
     
+    public bool Blocker()
+    {
+        return isBlocker;
+    }
 
 }

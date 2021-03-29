@@ -1849,6 +1849,7 @@ MonoBehaviour:
   tilePrefab: {fileID: 9107037143433623829, guid: 6f97fa5d86e400545ba7113640eea13f, type: 3}
   boardXSize: 16
   boardYSize: 16
+  Blocker: {fileID: 21300000, guid: 05f233e31ab7b5c43906226ae9c10426, type: 3}
   tileImages:
   - {fileID: 21300000, guid: 06871af7eb6c17c4c989b1260b7e529c, type: 3}
   - {fileID: 21300000, guid: 4d047827c4652d04e977f347b270348a, type: 3}

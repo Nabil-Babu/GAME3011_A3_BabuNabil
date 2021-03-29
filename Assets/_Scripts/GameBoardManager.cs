@@ -20,6 +20,7 @@ public class GameBoardManager : Singleton<GameBoardManager>
     public int boardXSize;
     public int boardYSize;
     private int _currentScore = 0;
+    public Sprite Blocker; 
     public List<Sprite> tileImages = new List<Sprite>();
     public List<Sprite> EasyModeImages = new List<Sprite>();
     public List<Sprite> AvailableImages = new List<Sprite>();
@@ -68,6 +69,7 @@ public class GameBoardManager : Singleton<GameBoardManager>
 
     void CreateBoard(float xOffset, float yOffset)
     {
+        Debug.Log("Creating Board");
         _tileGrid = new GameObject[boardXSize, boardYSize];
         
         float startX = transform.position.x;
@@ -86,16 +88,41 @@ public class GameBoardManager : Singleton<GameBoardManager>
                 newTile.transform.parent = transform;
                 _tileGrid[xIndex, yIndex] = newTile;
 
-                List<Sprite> possibleImages = new List<Sprite>();
-                possibleImages.AddRange(AvailableImages);
-
-                possibleImages.Remove(previousLeft[yIndex]);
-                possibleImages.Remove(previousBelow);
-                
-                Sprite newSprite = possibleImages[Random.Range(0, possibleImages.Count)];
-                newTile.GetComponent<SpriteRenderer>().sprite = newSprite;
-                previousLeft[yIndex] = newSprite;
-                previousBelow = newSprite;
+                if (Difficulty == Difficulty.HARD)
+                {
+                    float roll = Random.Range(0.0f, 1.0f);
+                    if (roll < 0.15f)
+                    {
+                        newTile.GetComponent<SpriteRenderer>().sprite = Blocker; 
+                        newTile.GetComponent<TileBehaviour>().MakeBlocker();
+                        newTile.GetComponent<TileBehaviour>().SpawnTile();
+                    }
+                    else
+                    {
+                        List<Sprite> possibleImages = new List<Sprite>();
+                        possibleImages.AddRange(AvailableImages);
+                        possibleImages.Remove(previousLeft[yIndex]);
+                        possibleImages.Remove(previousBelow);
+                        Sprite newSprite = possibleImages[Random.Range(0, possibleImages.Count)];
+                        newTile.GetComponent<SpriteRenderer>().sprite = newSprite;
+                        
+                        newTile.GetComponent<TileBehaviour>().SpawnTile();
+                        previousLeft[yIndex] = newSprite;
+                        previousBelow = newSprite;
+                    }
+                }
+                else
+                {
+                    List<Sprite> possibleImages = new List<Sprite>();
+                    possibleImages.AddRange(AvailableImages);
+                    possibleImages.Remove(previousLeft[yIndex]);
+                    possibleImages.Remove(previousBelow);
+                    Sprite newSprite = possibleImages[Random.Range(0, possibleImages.Count)];
+                    newTile.GetComponent<SpriteRenderer>().sprite = newSprite;
+                    newTile.GetComponent<TileBehaviour>().SpawnTile();
+                    previousLeft[yIndex] = newSprite;
+                    previousBelow = newSprite;
+                }
             }
         }
     }
@@ -108,15 +135,42 @@ public class GameBoardManager : Singleton<GameBoardManager>
         {
             for (int yIndex = 0; yIndex < boardYSize; yIndex++)
             {
-                List<Sprite> possibleImages = new List<Sprite>();
-                possibleImages.AddRange(AvailableImages);
-
-                possibleImages.Remove(previousLeft[yIndex]);
-                possibleImages.Remove(previousBelow);
-                Sprite newSprite = possibleImages[Random.Range(0, possibleImages.Count)];
-                _tileGrid[xIndex, yIndex].GetComponent<SpriteRenderer>().sprite = newSprite;
-                previousLeft[yIndex] = newSprite;
-                previousBelow = newSprite;
+                if (Difficulty == Difficulty.HARD)
+                {
+                    float roll = Random.Range(0.0f, 1.0f);
+                    if (roll < 0.15f)
+                    {
+                        _tileGrid[xIndex, yIndex].GetComponent<SpriteRenderer>().sprite = Blocker; 
+                        _tileGrid[xIndex, yIndex].GetComponent<TileBehaviour>().MakeBlocker();
+                        _tileGrid[xIndex, yIndex].GetComponent<TileBehaviour>().SpawnTile();
+                    }
+                    else
+                    {
+                        List<Sprite> possibleImages = new List<Sprite>();
+                        possibleImages.AddRange(AvailableImages);
+                        possibleImages.Remove(previousLeft[yIndex]);
+                        possibleImages.Remove(previousBelow);
+                        Sprite newSprite = possibleImages[Random.Range(0, possibleImages.Count)];
+                        _tileGrid[xIndex, yIndex].GetComponent<SpriteRenderer>().sprite = newSprite;
+                        
+                        _tileGrid[xIndex, yIndex].GetComponent<SpriteRenderer>().sprite = newSprite;
+                        _tileGrid[xIndex, yIndex].GetComponent<TileBehaviour>().SpawnTile();
+                        previousLeft[yIndex] = newSprite;
+                        previousBelow = newSprite;
+                    }
+                }
+                else
+                {
+                    List<Sprite> possibleImages = new List<Sprite>();
+                    possibleImages.AddRange(AvailableImages);
+                    possibleImages.Remove(previousLeft[yIndex]);
+                    possibleImages.Remove(previousBelow);
+                    Sprite newSprite = possibleImages[Random.Range(0, possibleImages.Count)];
+                    _tileGrid[xIndex, yIndex].GetComponent<SpriteRenderer>().sprite = newSprite;
+                    _tileGrid[xIndex, yIndex].GetComponent<TileBehaviour>().SpawnTile();
+                    previousLeft[yIndex] = newSprite;
+                    previousBelow = newSprite;
+                }
             }
         }
     }
@@ -136,11 +190,14 @@ public class GameBoardManager : Singleton<GameBoardManager>
 
         for (int x = 0; x < boardXSize; x++) {
             for (int y = 0; y < boardYSize; y++) {
-                _tileGrid[x, y].GetComponent<TileBehaviour>().ClearAllMatches();
+                if (!_tileGrid[x, y].GetComponent<TileBehaviour>().Blocker())
+                {
+                    _tileGrid[x, y].GetComponent<TileBehaviour>().ClearAllMatches();    
+                }
             }
         }
     }
-    
+
     private IEnumerator ShiftTilesDown(int x, int yStart, float shiftDelay = .2f) {
         if (!IsPlaying) yield break;
         IsShifting = true;
@@ -152,7 +209,11 @@ public class GameBoardManager : Singleton<GameBoardManager>
             if (render.sprite == null) {
                 nullCount++;
             }
-            renders.Add(render);
+
+            if (!(render.sprite == Blocker))
+            {
+                renders.Add(render);
+            }
         }
 
         for (int i = 0; i < nullCount; i++) {
